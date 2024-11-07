@@ -1,0 +1,33 @@
+﻿@using SmedaInternalMobile.Authentication
+<div>
+    <p>Are you sure want to log out?</p>
+
+    <div class="d-flex justify-content-center mt-2">
+        <button class="btn app-color text-white me-2" onclick="@Confirm">Confirm</button>
+        <button class="btn btn-light ms-2" onclick="@Cancel">Cancel</button>
+    </div>
+</div>
+
+
+@code {
+    [Inject]
+    DialogService _dialogService { get; set; }
+
+    [Inject]
+
+    public IAuthService AuthService { get; set; }
+
+    [Inject]
+    NavigationManager _navigationManager { get; set; }
+    private void Confirm()
+    {
+
+        AuthService.Logout();
+
+        _dialogService.Close();
+          _navigationManager.NavigateTo("/login", replace: true);
+    }
+    private void Cancel(){
+        _dialogService.Close();
+    }
+}

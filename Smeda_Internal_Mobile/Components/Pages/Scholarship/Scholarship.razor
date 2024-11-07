@@ -1,0 +1,192 @@
+﻿@page "/Scholarship"
+@using Data.Models.Scholarship
+@using SmedaInternalMobile.HttpHelperService.Defination
+@using SmedaInternalMobile.HttpHelperService.Employee
+@using SmedaInternalMobile.HttpHelperService.Leave
+@using SmedaInternalMobile.HttpHelperService.ScholarshipService
+@using SmedaInternalMobile.HttpHelperService.User
+@inject UserService UserService
+@inject IEmployeeService EmployeeService
+@inject NavigationManager Navigation
+@inject NotificationService NotificationServices
+@inject IDefinationService DefinitionService
+@inject IScholarshipService ScholarshipService
+@inject DialogService DialogService
+@inject IJSRuntime JSRuntime
+@inject ILeave Leave
+@using SmedaInternalMobile.Components.Localization
+
+<PageTitle>@Localization.RequestForScholarship</PageTitle>
+<style>
+    .row > .col-4, .row > .col-8 {
+        padding: 5px;
+    }
+
+    .validator {
+        margin-left: 4px;
+        color: red;
+    }
+</style>
+<RadzenCard>
+    <RadzenFieldset Text="@Localization.Scholarship" class="mt-3">
+        <RadzenTemplateForm Data="scholarshipViewModel" Submit="@((ScholarshipViewModel args) => { Submit(args); })">
+            <div class="row">
+                <!-- College -->
+                <div class="col-md-3">
+                    <RadzenLabel Text="@Localization.University" class="mb-1" /> 
+                    <RadzenTextBox TValue="string" AllowClear="true" Placeholder="@Localization.University" class="w-100"
+                                   @bind-Value="scholarshipViewModel.University" Name="University" />
+                    <RadzenRequiredValidator style="display:block" Component="University" Text=@Localization.Required Popup=@popup />
+                </div>
+
+                <!-- Level of Degree -->
+                <div class="col-md-3">
+                    <RadzenLabel Text="@Localization.LevelOfDegree" class="mb-1" /> 
+                    @if (degreeOfLevel == null)
+                    {
+                        <p><em>@Localization.Loading___</em></p>
+                    }
+                    else
+                    {
+                        <RadzenDropDown @bind-Value="scholarshipViewModel.LevelOfDegreeId" Placeholder="@Localization.LevelOfDegree"
+                                        class="w-100"
+                                        Data="@(degreeOfLevel.Select(c => new { Id = c.Id, Name = isArabic ? c.TitleAr : c.TitleEn }).Distinct().AsQueryable())"
+                                        TextProperty="Name" ValueProperty="Id" Name="LevelOfDegree" />
+                        <RadzenRequiredValidator style="display: block;" Component="LevelOfDegree" Text=@Localization.Required Popup=@popup />
+                    }
+                </div>
+
+                <!-- University -->
+                <div class="col-md-3">
+                    <RadzenLabel Text="@Localization.Description" class="mb-1" /> 
+                    <RadzenTextArea TValue="string" AllowClear="true" Placeholder="@Localization.Description" class="w-100"
+                                    @bind-Value="scholarshipViewModel.Description" Name="Description" />
+                    <RadzenRequiredValidator style="display:block" Component="Description" Text=@Localization.Required Popup=@popup />
+                </div>
+            </div>
+
+            <div class="row justify-content-center mt-4">
+                <div class="col-md-12 d-flex align-items-end justify-content-center">
+                    <RadzenButton ButtonType="ButtonType.Submit" Icon="add" Style="background-color:#003366; margin-right: 10px;" Text="@Localization.Submit" />
+                    &nbsp;
+                    &nbsp;
+                    &nbsp;
+                    <RadzenButton ButtonStyle="ButtonStyle.Light" Icon="cancel" Click="@(() => Cancel())" class="ml-2" Text="@Localization.Cancellation" />
+                </div>
+            </div>
+        </RadzenTemplateForm>
+    </RadzenFieldset>
+
+
+
+    @*    } *@
+
+    @*   @if (@user.HasPermission("Scholarship", ConstantStrings.View) || @user.HasPermission("Scholarship", ConstantStrings.Add))
+    { *@
+
+
+    <RadzenFieldset class="mt-4" Text="@Localization.ListofRequests">
+        @foreach (var model in getAllData)
+        {
+            <RadzenCard Class="custom-card" Style="margin-bottom: 15px;">
+                <div class="card-header custom-card-header">
+                    <h4><i class="material-icons header-icon">school</i> @model.LevelOfDegree</h4>
+                </div>
+                <div class="card-body custom-card-body">
+                    <div class="row align-items-center mb-2">
+                        <div class="col-auto">
+                            <i class="material-icons body-icon">person</i>
+                        </div>
+                        <div class="col">
+                            <strong>@Localization.EmployeeName:</strong> @model.EmployeeName
+                        </div>
+                    </div>
+
+                    <div class="row align-items-center mb-2">
+                        <div class="col-auto">
+                            <i class="material-icons body-icon">account_balance</i>
+                        </div>
+                        <div class="col">
+                            <strong>@Localization.University:</strong> @model.University
+                        </div>
+                    </div>
+
+                    <div class="row align-items-center mb-2">
+                        <div class="col-auto">
+                            <i class="material-icons body-icon">school</i>
+                        </div>
+                        <div class="col">
+                            <strong>@Localization.LevelOfDegree:</strong> @model.LevelOfDegree
+                        </div>
+                    </div>
+
+                    <div class="row align-items-center mb-2">
+                        <div class="col-auto">
+                            <i class="material-icons body-icon">description</i>
+                        </div>
+                        <div class="col">
+                            <strong>@Localization.Description:</strong> @model.Description
+                        </div>
+                    </div>
+
+                    <div class="row align-items-center mb-2">
+                        <div class="col-auto">
+                            <i class="material-icons body-icon">visibility</i>
+                        </div>
+                        <div class="col">
+                            <strong>@Localization.ApproveDocumentForCollage:</strong>
+                            @if (model.ApproveDocumentForCollage != null)
+                            {
+                                <a style="color:#396391;cursor:pointer;">
+                                    @Localization.Click_to_View
+                                </a>
+                            }
+                            else
+                            {
+                                <span>N/A</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="row align-items-center mb-2">
+                        <div class="col-auto">
+                            <i class="material-icons body-icon">receipt</i>
+                        </div>
+                        <div class="col">
+                            <strong>@Localization.Payment_Invoice:</strong>
+                            @if (model.PaymentInvoiceDocument != null)
+                            {
+                                <a style="color:#396391;cursor:pointer;">
+                                    @Localization.Click_to_View
+                                </a>
+                            }
+                            else
+                            {
+                                <span>N/A</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer d-flex justify-content-between align-items-center p-1" style="padding: 0.25rem; border-top: none;">
+                    <div class="d-flex align-items-center">
+                        <i class="material-icons body-icon">schedule</i>
+                        <strong class="ml-2">@Localization.Status:</strong>
+                        <span class="ml-1">@model.ApproversStatus</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <RadzenButton ButtonStyle="ButtonStyle.Secondary"
+                                      Variant="Variant.Flat"
+                                      Shade="Shade.Lighter"
+                                      Icon="info"
+                                      class="m-1"
+                                      Click="@(() => GetActionDetail(model.Id))" />
+                    </div>
+                </div>
+            </RadzenCard>
+        }
+    </RadzenFieldset>
+
+    @*        } *@
+</RadzenCard>
+

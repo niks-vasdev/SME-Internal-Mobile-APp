@@ -1,0 +1,224 @@
+﻿@using CommunityToolkit.Maui.Core
+@using Data
+@using Logic
+@using Microsoft.Extensions.Configuration
+@using SmedaInternalMobile.Components.Localization
+@inherits LayoutComponentBase
+@inject IConfiguration Configuration;
+@inject NavigationManager NavigationManager
+@using Microsoft.Maui.Controls
+
+
+
+<style>
+
+    .rz-panel-menu .rz-navigation-item-text {
+        flex: auto;
+        color: #00416d;
+        font-size: 17px;
+    }
+
+    .icon-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    .badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: red;
+        color: white;
+        border-radius: 50%;
+        padding: 5px;
+    }
+
+    .rz-panel-menu .rz-navigation-item-icon {
+        height: var(--rz-panel-menu-icon-height);
+        width: var(--rz-panel-menu-icon-width);
+        color: var(--rz-panel-menu-icon-color);
+        margin: var(--rz-panel-menu-icon-margin);
+        font-size: var(--rz-panel-menu-icon-font-size);
+        transition: var(--rz-panel-menu-item-transition);
+        color: #00416d;
+    }
+
+    .rz-dialog-content {
+        padding-left: 30px;
+        padding-right: 30px;
+        padding-top: 20px;
+        padding-bottom: 35px;
+        flex: 0 1 auto;
+        overflow: auto;
+    }
+
+    .rz-button.rz-primary.rz-shade-default {
+        background-color: #00416d;
+        color: var(--rz-on-primary);
+    }
+
+    .rz-button.rz-secondary.rz-shade-default {
+        background-color: #FBFBFB;
+        color: black;
+    }
+
+    .icon-container {
+        position: absolute;
+        top: 8px;
+        right: 20px;
+        display: inline-block;
+    }
+
+    .badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: red;
+        color: white;
+        border-radius: 50%;
+        padding: 5px;
+    }
+
+    .rtl {
+        direction: rtl;
+        text-align: right;
+    }
+
+        .rtl .rz-panel-menu .rz-navigation-item-text {
+            text-align: right;
+            padding-right: 20px;
+            padding-left: 0;
+        }
+
+        .rtl .rz-sidebar {
+            right: 0;
+            left: auto;
+        }
+
+    .ltr {
+        direction: ltr;
+        text-align: left;
+    }
+
+    .language-switcher {
+        display: flex;
+        align-items: center;
+        margin-right: 20px;
+    }
+
+    .language-button {
+        background-color: transparent;
+        border: none;
+        color: white;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+        .language-button:hover {
+            text-decoration: underline;
+        }
+</style>
+
+<RadzenLayout class="@(isArabic ? "rtl" : "ltr")" style="position: relative; grid-template-areas: 'rz-sidebar rz-header' 'rz-sidebar rz-body'">
+    <AuthorizeView>
+        <Authorized>
+            <RadzenHeader style="background-color:#00416d; display: flex; justify-content: space-between; align-items: center;">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
+                    <RadzenSidebarToggle Click="@(async () => { sidebarExpanded = !sidebarExpanded; await GettingUserRole(); })" />
+                    <RadzenLabel Text="@navHeading" style="font-size:20px; color: white;" />
+                </RadzenStack>
+
+                <div class="language-switcher">
+                    <SmedaInternalMobile.Components.Pages.Multilingual />
+                </div>
+            </RadzenHeader>
+        </Authorized>
+    </AuthorizeView>
+
+    <RadzenSidebar Responsive="false" @bind-Expanded="@sidebarExpanded" style="position: absolute; z-index: 3">
+        <div style="width: 100%; background-color: #00416d;">
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start" Gap="1rem" Class="rz-p-4">
+                <img src=".\first.png" alt="SME Logo" style="filter: brightness(0) invert(1); width: 80px; height: 80px;" />
+                <RadzenStack Gap="0">
+                    <p style="margin-top: 12px; margin-bottom: 0px; color: white; font-size: 18px">@Localization.WelcomeSME</p>
+
+                </RadzenStack>
+            </RadzenStack>
+        </div>
+        <RadzenPanelMenu>
+            <AuthorizeView>
+                <div class="nav-item" style="margin: 0px;">
+                    <NavLink class="nav-link p-0" href="dashboard">
+                        <RadzenPanelMenuItem Text="@Localization.Dashboard" Icon="home"
+                                             Click="@(() => { CloseSideBar(); navHeading = Localization.Dashboard; })" />
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link p-0" href="salarystatement">
+                        <RadzenPanelMenuItem Text="@Localization.SalaryStatement" Icon="manage_accounts"
+                                             Click="@(() => { CloseSideBar(); navHeading = Localization.SalaryStatement; })" />
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link p-0" href="vacationrequest">
+                        <RadzenPanelMenuItem Text="@Localization.LeaveRequest" Icon="description"
+                                             Click="@(() => { CloseSideBar(); navHeading = Localization.LeaveRequest; })" />
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link p-0" href="vehiclerequest">
+                        <RadzenPanelMenuItem Text="@Localization.Vehicle_Management" Icon="directions_car"
+                                             Click="@(() => { CloseSideBar(); navHeading = Localization.Vehicle_Management; })" />
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link p-0" href="Scholarship">
+                        <RadzenPanelMenuItem Text="@Localization.Scholarship_Request" Icon="manage_accounts"
+                                             Click="@(() => { CloseSideBar(); navHeading = Localization.Scholarship_Request; })" />
+                    </NavLink>
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link p-0" href="ExperienceCertificate">
+                        <RadzenPanelMenuItem Text="@Localization.RequestSalaryStatement" Icon="manage_accounts"
+                                             Click="@(() => { CloseSideBar(); navHeading = Localization.RequestSalaryStatement; })" />
+                    </NavLink>
+                </div>
+            </AuthorizeView>
+
+            @if (sidebarExpanded)
+
+            {
+                <AuthorizeView>
+                    <Authorized>
+                        <div class="d-flex justify-content-between align-content-center p-2 bottom-0 position-fixed" style="width: 300px;">
+                            <div class="d-flex" onclick="@goToProfile">
+                                <img src=".\review1.jpg" style="border-radius: 50%; width: 40px; height: 40px;" />
+                                <div class="ms-2">
+                                    <p class="m-0" style="font-size: 17px;">@UserName</p>
+                                    <p style="color: darkgray; font-size: 14px;">@Role</p>
+                                </div>
+                            </div>
+                            <i class="fa fa-sign-out" @onclick="LogOut" style="font-size: 26px; padding: 10px; color: #00416d;" aria-hidden="true"></i>
+                        </div>
+                    </Authorized>
+                </AuthorizeView>
+            }
+        </RadzenPanelMenu>
+    </RadzenSidebar>
+
+    <RadzenBody>
+        <div style="margin: -16px; background-color: #F8F8FA; height: 100%;">
+            @Body
+        </div>
+    </RadzenBody>
+
+    @if (sidebarExpanded)
+
+    {
+        <div @onclick="@(() => sidebarExpanded = false)" class="rz-dialog-mask" style="position: absolute; z-index: 2"></div>
+    }
+</RadzenLayout>
+
+
+
+<RadzenComponents />

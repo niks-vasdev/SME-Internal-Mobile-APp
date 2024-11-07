@@ -1,0 +1,68 @@
+﻿.app-color{
+    background-color:#00416d;
+}
+
+.test{
+    color:pink;
+}
+
+/*hamburger icon*/
+.rz-sidebar-toggle:hover {
+    color: var(--rz-sidebar-toggle-hover-color);
+    background: #00416d;
+    border-radius: var(--rz-sidebar-toggle-hover-border-radius);
+}
+/*dailog title*/
+.rz-dialog-titlebar {
+    background-color: #00416d;
+    color:white;
+    
+    padding:15px;
+    font-size: var(--rz-dialog-title-font-size);
+    line-height: var(--rz-dialog-title-line-height);
+    border-bottom: var(--rz-dialog-title-border);
+}
+.rz-dialog-titlebar-close .rzi-times:before {
+    content: "close";
+    color: white;
+}
+
+.rz-dialog-title {
+    font-weight: var(--rz-dialog-title-font-weight);
+    letter-spacing: var(--rz-dialog-title-letter-spacing);
+    color: white;
+}
+..rz-dialog-content {
+    /* padding-left: 30px; */
+    /* padding-right: 30px; */
+    padding-top: 20px;
+    padding-bottom: 35px;
+    flex: 0 1 auto;
+    overflow: auto;
+}
+::-webkit-scrollbar {
+    display: none
+}
+
+.rz-layout .rz-body {
+    grid-area: rz-body;
+    overflow: auto;
+}
+
+@media (max-width: 768px) {
+    .rz-dialog:not(.rz-dialog-confirm):not(.rz-dialog-alert) {
+        /*position: absolute;*/
+        width: 85% !important;
+        top: 20% !important;
+        border-radius: 7px;
+    }
+}
+
+
+@media only screen and (max-width: 310px) {
+   .dashboard-icons{
+       display : none;
+   }
+   
+}
+    

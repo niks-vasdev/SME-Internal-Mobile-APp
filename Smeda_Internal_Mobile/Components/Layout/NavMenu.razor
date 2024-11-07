@@ -1,0 +1,88 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using SmedaInternalMobile.Authentication
+@using SmedaInternalMobile.HttpHelperService.User
+@inject DialogService DialogService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserService UserService
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<div class="top-row ps-3 navbar navbar-dark" >
+    <div class="container-fluid">
+        <a class="navbar-brand" style="margin-left:120px">Smeda_Internal_Mobile </a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+
+      
+@code
+{
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; }
+
+
+
+
+
+
+
+    public UserModel user { get; set; }
+
+
+
+    [Inject]
+
+    public IAuthService AuthService { get; set; }
+
+    [Inject]
+    NavigationManager _navigationManager { get; set; }
+    private string Role;
+    bool IsAuthenticated = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        GettingUserRole();
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+       
+        var user = authState.User;
+
+        IsAuthenticated = user.Identity.IsAuthenticated;
+
+
+    }
+
+
+
+    private async Task GettingUserRole()
+
+    {
+
+
+
+        user = UserService.User;
+
+
+
+        Role = user.Role; 
+        
+
+        StateHasChanged();
+
+    }
+
+
+
+    private async Task LogOut()
+    {
+       
+     
+        AuthService.Logout();
+            _navigationManager.NavigateTo("/login", replace: true);
+        
+     
+    }
+
+}

@@ -1,0 +1,137 @@
+﻿@page "/ExperienceCertificate"
+@inject IEmployeeService EmployeeService
+@inject NavigationManager Navigation
+@inject NotificationService NotificationServices
+@inject IExperienceCertificateService ExperienceCertificateService
+@inject IJSRuntime JSRuntime
+@inject DialogService DialogService
+@using Data.Models.ExperienceCertificate
+@using SmedaInternalMobile.Components.Localization
+@using SmedaInternalMobile.HttpHelperService.Employee
+@using SmedaInternalMobile.HttpHelperService.ExperienceCertificate
+@using SmedaInternalMobile.HttpHelperService.User
+@inject UserService UserServices
+@inject NotificationService NotificationService
+
+<PageTitle>@Localization.ExperienceCertificate</PageTitle>
+
+<style>
+    .row > .col-md-2, .row > .col-md-4 {
+        padding: 5px;
+    }
+
+    .validator {
+        color: red;
+        margin-left: 4px;
+    }
+</style>
+
+<RadzenCard>
+    <RadzenFieldset Text="@Localization.ExperienceCertificate" class="mt-3">
+        <RadzenTemplateForm Data="@expCertificate" Submit="@((ExperienceCertificateViewModel args) => { Submit(args); })">
+            <div class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="@Localization.SelectEmployee" /> 
+                    @if (employees == null)
+                    {
+                        <p><em>@Localization.Loading___</em></p>
+                    }
+                    else
+                    {
+                        <RadzenTextBox TValue="string" Disabled="true" Placeholder="@Localization.SelectEmployee"
+                                       style="width: 100%;" @bind-Value="expCertificate.EmployeeName" Name="EmployeeName" />
+                        <RadzenRequiredValidator Component="EmployeeName" Text="@Localization.Required" Popup="@popup" style="display:block" />
+                    }
+                </div>
+                <div class="col-md-3">
+                    <RadzenLabel Text="@Localization.Designation" /> 
+                    <RadzenTextBox @bind-Value="expCertificate.Designation" Placeholder="@Localization.Designation"
+                                   style="width:100%;" Name="Designation" Disabled="true" />
+                    <RadzenRequiredValidator Component="Designation" Text="@Localization.Required" Popup="@popup" style="display:block" />
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-md-3">
+                    <RadzenLabel Text="@Localization.StartingDate" /> 
+                    <RadzenDatePicker Disabled="false" AllowInput="false" style="width:100%"
+                                      DateFormat="d" TValue="DateTime?" @bind-Value="expCertificate.StartingDate" Name="StartingDate" />
+                    <RadzenRequiredValidator Component="StartingDate" Text="@Localization.Required" Popup="@popup" style="display:block" />
+                </div>
+                <div class="col-md-3">
+                    <RadzenLabel Text="@Localization.EndingDate" /> 
+                    <RadzenDatePicker Disabled="false" AllowInput="false" DateFormat="d" TValue="DateTime?"
+                                      style="width:100%" @bind-Value="expCertificate.EndingDate" Name="EndingDate" />
+                    <RadzenRequiredValidator Component="EndingDate" Text="@Localization.Required" Popup="@popup" style="display:block" />
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <RadzenLabel Text="@Localization.Remarks" /> 
+                    <RadzenTextArea @bind-Value="expCertificate.Remarks" Placeholder="@Localization.Remarks"
+                                    style="width:100%" Name="Remarks" />
+                    <RadzenRequiredValidator Component="Remarks" Text="@Localization.Required" Popup="@popup" style="display:block" />
+                </div>
+            </div>
+
+            <div class="row justify-content-center mt-4">
+                <div class="col-md-12 d-flex justify-content-center">
+                    <RadzenButton ButtonType="ButtonType.Submit" Icon="add" Style="background-color:#003366;" Text="@Localization.Submit" />
+                    &nbsp;
+                    &nbsp;
+                    <RadzenButton ButtonStyle="ButtonStyle.Light" Icon="cancel" Click="@(() => Cancel())" Text="@Localization.Cancellation" />
+                </div>
+            </div>
+        </RadzenTemplateForm>
+    </RadzenFieldset>
+
+    <RadzenFieldset class="mt-4" Text="@Localization.ListofRequests">
+        @foreach (var model in history)
+        {
+            <RadzenCard Class="custom-card" Style="margin-bottom: 15px;">
+                <div class="card-header custom-card-header">
+                    <h4><i class="material-icons header-icon">person</i> @model.EmployeeName</h4>
+                </div>
+                <div class="card-body custom-card-body">
+                    <div class="row align-items-center mb-2">
+                        <div class="col-auto">
+                            <i class="material-icons body-icon">work</i>
+                        </div>
+                        <div class="col">
+                            <strong>@Localization.Designation:</strong> @model.Designation
+                        </div>
+                    </div>
+                    <div class="row align-items-center mb-2">
+                        <div class="col-auto">
+                            <i class="material-icons body-icon">calendar_today</i>
+                        </div>
+                        <div class="col">
+                            <strong>@Localization.StartingDate:</strong> @model.StartingDate.ToShortDateString()
+                        </div>
+                    </div>
+                    <div class="row align-items-center mb-2">
+                        <div class="col-auto">
+                            <i class="material-icons body-icon">event</i>
+                        </div>
+                        <div class="col">
+                            <strong>@Localization.EndingDate:</strong> @model.EndingDate.ToShortDateString()
+                        </div>
+                    </div>
+                    <div class="row align-items-center mb-2">
+                        <div class="col-auto">
+                            <i class="material-icons body-icon">info</i>
+                        </div>
+                        <div class="col">
+                            <strong>@Localization.Status:</strong> @model.ApproversStatus
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between align-items-center p-1" style="padding: 0.25rem; border-top: none;">
+                    <RadzenButton ButtonStyle="ButtonStyle.Secondary" Variant="Variant.Flat" Shade="Shade.Lighter" Icon="info"
+                                  class="m-1" Click="@(() => GetActionDetail(model.Id))" />
+                </div>
+            </RadzenCard>
+        }
+    </RadzenFieldset>
+</RadzenCard>

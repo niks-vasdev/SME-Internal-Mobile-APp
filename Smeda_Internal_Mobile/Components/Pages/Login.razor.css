@@ -1,0 +1,25 @@
+﻿.input-border {
+    position: relative;
+}
+
+    .input-border input {
+        padding-left: 45px;
+        padding-right: 15px;
+        border: 2px solid white;
+        box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.45);
+        border-radius: 20px;
+        width: 300px;
+    }
+
+    .input-border i {
+        position: absolute;
+        top: 50%;
+        left: 15px;
+        transform: translateY(-50%);
+        pointer-events: none;
+    }
+
+.username-field input:focus {
+    border-color: red;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.25);
+}

@@ -1,0 +1,130 @@
+﻿@page "/profile"
+@using SmedaInternalMobile.HttpHelperService.User
+@inject UserService UserService
+@layout AuthLayout
+@using SmedaInternalMobile.Components.Localization
+
+<style>
+    p{
+        margin:0;
+    }
+    .custom-border{
+        border: 1px solid #E8E9EB;
+        position: relative;
+        border-radius: 8px;
+        background-color: White;
+        padding: 10px;
+        margin: 20px 0 0 0
+    }
+    .legend-text{
+        font-size: 14px;
+        padding: 0 5px;
+        position: absolute;
+        top: -12px;
+        left: 12px;
+        display: inline-block;
+        background-color: white
+    }
+</style>
+<div>
+    @* header *@
+    <div class="container-fluid margin-top:20px" style="background-color:#00416d;width:100%;">
+
+   
+
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center p-3 ">
+                <i class="fa fa-arrow-left" style="color: #ffffff;font-size:22px;font-weight:100" onclick="@goBack"></i>
+                <p style="color: #ffffff;font-size:18px;margin:0 20px">@Localization.Profile</p>
+            </div>
+
+
+        </div>
+        
+
+   
+
+    </div>
+
+    <EditForm Model="@userProfile" OnValidSubmit="@SaveProfile">
+         <DataAnnotationsValidator />
+        <div class="d-flex flex-column p-4" style="background-color:white;">
+            <img class="align-self-center" src=".\review1.jpg" style="border-radius:50%;width:100px;height:100px;" />
+
+
+
+       
+            <div class="custom-border">
+                <p class="legend-text">@Localization.Person_Name</p>
+                <div>
+                    @if (isEditable)
+                    {
+                        <input type="text" style="border:0px;outline: none; width:100%;" @bind="@userProfile.EmployeeName" placeholder=@Localization.Name />
+                    }
+                    else
+                    {
+                        <p style="font-size: 16px;color:#949494">@userProfile.EmployeeName</p>
+
+                    }
+                </div>
+            </div>
+                         <ValidationMessage For="()=> userProfile.EmployeeName" style="font-size:14px;margin-left:5px;" />
+
+            <div class="custom-border">
+                <p class="legend-text">@Localization.EmployeeCode</p>
+                <div>
+                    <p style="font-size: 16px;color:#949494">@userProfile.CivilCode</p>
+                </div>
+            </div>
+
+            <div class="custom-border">
+                <p class="legend-text">@Localization.ContactNumber</p>
+                <div>
+               
+                </div>
+            </div>
+              <ValidationMessage For="()=> userProfile.Contact" style="font-size:14px;margin-left:5px;" />
+
+            <div class="custom-border">
+                <p class="legend-text">@Localization.Department</p>
+                <div>
+                    @if (userProfile.Department != null && userProfile.Department.Any())
+
+                    {
+                        foreach (var organization in userProfile.Department)
+                        {
+                            <p style="font-size: 16px;color:#949494">@organization</p>
+                        }
+
+                    }
+
+                    else
+
+                    {
+                        <p style="font-size: 16px;color:#949494">@Localization.Department</p>
+                    }
+                </div>
+            </div>
+
+
+
+            <div class="custom-border">
+                <p class="legend-text">@Localization.Role</p>
+                <div>
+                    <p style="font-size: 16px;color:#949494">@userProfile.Role</p>
+                </div>
+            </div>
+
+
+            <div class="custom-border">
+                <p class="legend-text">@Localization.Grade</p>
+                <div>
+                    <p style="font-size: 16px;color:#949494">@userProfile.Grade</p>
+                </div>
+            </div>
+        </div>
+
+    </EditForm>
+
+    
+</div>

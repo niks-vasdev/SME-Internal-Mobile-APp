@@ -1,0 +1,21 @@
+﻿@page "/Thankyou"
+@inject NavigationManager NavigationManager
+
+<PageTitle>Thankyou</PageTitle>
+
+<div class="d-flex justify-content-center align-items-center" style="height: 80vh;">
+    <div class="text-center">
+        <h1 style="color: #396391;">You have Successfully Set the Password!</h1>
+        <h5 style="margin-top:30px;margin-bottom:20px">Click here to Login</h5>
+        <RadzenButton Shade="Shade.Dark" Icon="login" Click=@(args => login()) Style="background-color:#396391" class="ms-1" Text=Login ButtonStyle="ButtonStyle.Secondary" />
+    </div>
+</div>
+
+@code {
+    private void login()
+    {
+        NavigationManager.NavigateTo("Login");
+    }
+}
+
+

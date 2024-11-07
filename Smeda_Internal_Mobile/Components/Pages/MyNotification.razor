@@ -1,0 +1,39 @@
+﻿ @page "/myNotification"
+@layout AuthLayout
+@*
+<div>
+   
+    <div class="container-fluid margin-top:20px" style="background-color:#00416d;width:100%;">
+
+       
+
+        <div class="d-flex align-items-center p-3 ">
+            <i class="fa fa-arrow-left" style="color: #ffffff;font-size:22px;font-weight:100" onclick="@goBack"></i>
+            <p style="color: #ffffff;font-size:18px;margin:0 20px">My Notification</p>
+        </div>
+  
+
+      
+    </div>
+    <div class="notification-cards">
+        @if (notifications != null && notifications.Any())
+        {
+            @foreach (var notification in notifications)
+            {
+                <div class="card" @onclick="() => MarkAsRead(notification)">
+                    <div class="card-body">
+                        <h5 class="card-title " style="color:#00416d">@notification.Title</h5>
+                        <p class="card-text">@notification.Message</p>
+                        <p class="card-text"><small class="text-muted">@notification.Timestamp.ToString("MMMM dd, yyyy hh:mm tt")</small></p>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div>No notifications</div>
+        }
+    </div>
+</div>
+
+  *@

@@ -1,0 +1,411 @@
+﻿@page "/vacationrequest"
+@using Data.Models.Leave
+@using Radzen
+@using System.ComponentModel.DataAnnotations
+@using SmedaInternalMobile.Components.Pages.LeaveActions
+@using SmedaInternalMobile.HttpHelperService.Leave
+@using SmedaInternalMobile.HttpHelperService.User
+@using System.Globalization
+@using SmedaInternalMobile.Components.Localization
+@inject ILeave Leave
+@inject UserService UserService
+@inject NotificationService NotificationService
+@inject ILeaveBalanceService LeaveBalanceService
+@inject DialogService DialogService
+<PageTitle>@Localization.VacationRequests</PageTitle>
+<style>
+    body {
+        background: linear-gradient(to bottom right, #e0f7fa, #b2ebf2);
+        font-family: Arial, sans-serif;
+    }
+
+    
+    #vehicleDiv {
+        background-color: white !important;
+    }
+
+
+
+
+    .card-container {
+        border: 1px solid #ced4da;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        background: white;
+    }
+
+    .custom-card {
+        background: white;
+        border-radius: 10px;
+        border: 1px solid #ced4da;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        height: 100%;
+    }
+
+    .card-footer {
+        text-align: right;
+        padding: 10px;
+        border-top: 1px solid #ced4da;
+    }
+
+
+
+    .btn-custom:hover {
+        background-color: #0056b3;
+    }
+
+    .required {
+        color: red;
+    }
+
+    
+
+    .custom-date-picker {
+        width: 100%;
+        border-radius: 5px;
+        border: 1px solid #ced4da;
+        padding: 8px;
+        font-size: 0.9rem;
+        box-shadow: none;
+    }
+
+        .custom-date-picker:focus {
+            border-color: #ced4da !important;
+        }
+
+        .custom-date-picker::focus {
+            outline: none;
+            box-shadow: none !important;
+        }
+
+</style>
+
+<div class="container-fluid mt-4" id="vehicleDiv" >
+    <RadzenFieldset Text="@Localization.LeaveRequest" class="mt-3">
+        <RadzenTemplateForm Data="@leaveRequest" Submit="@((LeaveRequestViewModel args) => { Submit(args); })">
+            <div class="row">
+
+                <!-- Request Type -->
+                <div class="col-md-3">
+                    <RadzenLabel Text="@Localization.RequestType" class="mb-1" />
+                    @if (leaveType == null)
+                    {
+                        <p><em>@Localization.Loading___</em></p>
+                    }
+                    else
+                    {
+                        <RadzenDropDown AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                        @bind-Value="leaveRequest.LeaveTypeId" AllowClear="true" Placeholder="@Localization.RequestType"
+                                        class="w-100" Data="@(leaveType.Select(c => new { Id = c.Id, Name = isArabic ? c.LeaveTypeAr : c.LeaveTypeEn }).Distinct().AsQueryable())"
+                                        TextProperty="Name" ValueProperty="Id" Name="LeaveType" />
+                        <RadzenRequiredValidator style="display: block;" Component="LeaveType" Text="@Localization.Required" Popup="@popup" />
+                    }
+                </div>
+
+                <!-- Reason -->
+                <div class="col-md-3">
+                    <RadzenLabel Text="@Localization.Reason" class="mb-1" />
+                    <RadzenTextArea @bind-Value="leaveRequest.Reason" Placeholder="@Localization.Reason" class="w-100" Name="Reason" />
+                </div>
+
+                <!-- From Date -->
+                <div class="col-md-3">
+                    <RadzenLabel Text="@Localization.From" class="mb-1" />
+                    <RadzenDatePicker AllowInput="false" DateFormat="d" TValue="DateTime?" @bind-Value="leaveRequest.From" 
+                                      DateRender="@DateRender" Name="Date" Change="GetFromDate" class="w-100" />
+                    <RadzenRequiredValidator Component="Date" Text="@Localization.Required" Popup="@popup" />
+                </div>
+
+                <!-- To Date -->
+                <div class="col-md-3">
+                    <RadzenLabel Text="@Localization.To" class="mb-1" />
+                    <RadzenDatePicker Disabled="leaveRequest.From == null" AllowInput="false" Min="leaveRequest.From" DateFormat="d" 
+                                      TValue="DateTime?" @bind-Value="leaveRequest.To" DateRender="@DateRender" Name="EndDate" 
+                                      Change="GetTotalDays" class="w-100" />
+                    <RadzenRequiredValidator Component="EndDate" Text="@Localization.Required" Popup="@popup" />
+                </div>
+
+                <!-- Total Days -->
+                <div class="col-md-3">
+                    <RadzenLabel Text="@Localization.TotalDays" class="mb-1" />
+                    <p class="font-weight-bold mb-0">@leaveRequest.NumberOfdays</p>
+                </div>
+
+            </div>
+
+            <!-- Submit and Cancel Buttons -->
+            <div class="row justify-content-center mt-4">
+                <div class="col-md-12 d-flex align-items-center justify-content-center">
+                    <RadzenButton ButtonType="ButtonType.Submit" Icon="add" Style="background-color:#003366;" Text="@Localization.Submit" Disabled="@isSubmitting" />
+                    &nbsp;
+                    &nbsp;
+                    <RadzenButton ButtonStyle="ButtonStyle.Light" Icon="cancel" Click="@(() => Cancel())" class="ml-2" Text="@Localization.Cancellation" />
+                </div>
+            </div>
+        </RadzenTemplateForm>
+    </RadzenFieldset>
+
+    <RadzenFieldset Text="@Localization.LeaveHistory" class="mt-4">
+        <div class="row">
+            @foreach (var leave in history)
+            {
+                <div class="col-md-4 mb-4">
+                    <RadzenCard Class="custom-card">
+                        <div class="card-header custom-card-header">
+                            <h4><i class="material-icons header-icon">event_note</i> @leave.LeaveType</h4>
+                        </div>
+                        <div class="card-body custom-card-body">
+                            <div class="row align-items-center mb-2">
+                                <div class="col-auto">
+                                    <i class="material-icons body-icon">date_range</i>
+                                </div>
+                                <div class="col">
+                                    <strong>@Localization.From:</strong> @leave.From.ToString("dd/MM/yyyy")
+                                </div>
+                            </div>
+                            <div class="row align-items-center mb-2">
+                                <div class="col-auto">
+                                    <i class="material-icons body-icon">date_range</i>
+                                </div>
+                                <div class="col">
+                                    <strong>@Localization.To:</strong> @leave.To.ToString("dd/MM/yyyy")
+                                </div>
+                            </div>
+                            <div class="row align-items-center mb-2">
+                                <div class="col-auto">
+                                    <i class="material-icons body-icon">schedule</i>
+                                </div>
+                                <div class="col">
+                                    <strong>@Localization.TotalDays:</strong> @leave.NumberOfDays
+                                </div>
+                            </div>
+                            <div class="row align-items-center mb-2">
+                                <div class="col-auto">
+                                    <i class="material-icons body-icon">person</i>
+                                </div>
+                                <div class="col">
+                                    <strong>@Localization.Name:</strong> @leave.EmployeeName
+                                </div>
+                            </div>
+                            <div class="row align-items-center mb-2">
+                                <div class="col-auto">
+                                    <i class="material-icons body-icon">person</i>
+                                </div>
+                                <div class="col">
+                                    <strong>@Localization.Reason:</strong> @leave.LeaveReason
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer d-flex justify-content-between align-items-center p-1">
+                            <div class="d-flex align-items-center">
+                                <i class="material-icons body-icon">schedule</i>
+                                <strong class="ml-2">@Localization.Status:</strong> <span>@leave.ApproversStatus</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <RadzenButton ButtonStyle="ButtonStyle.Secondary" Variant="Variant.Flat" Shade="Shade.Lighter"
+                                              Icon="info" class="m-1" Click="@(() => GetActionDetail(leave.Id))" />
+                            </div>
+                        </div>
+                    </RadzenCard>
+                </div>
+            }
+        </div>
+    </RadzenFieldset>
+</div>
+
+
+
+
+@code {
+    private LeaveRequestViewModel leaveRequest = new LeaveRequestViewModel();
+    private IEnumerable<LeaveRuleListingViewModel> leaveType;
+    private List<LeaveHistoryViewModel> history = new List<LeaveHistoryViewModel>();
+    private RadzenDataGrid<LeaveHistoryViewModel> LeaveList { get; set; }
+    private LeaveHistoryViewModel modalDocumentname = new LeaveHistoryViewModel();
+    private bool popup;
+    public bool isArabic;
+    [Parameter]
+    public UserModel user { get; set; }
+    private string reason;
+    private DateTime? fromDate;
+    private DateTime? toDate;
+    private int totalDays;
+    private bool showSubstitute = false;
+    private RadzenDialog dialog;
+    [Parameter]
+    public Guid Id { get; set; }
+    private List<StatusViewModal> status;
+    private bool isSubmitting = false;
+
+
+
+    public async Task GetActionDetail(Guid id)
+    {
+        await DialogService.OpenAsync<StatusDetail>("Status Detail", new Dictionary<string, object>() { { "Id", id } }, new DialogOptions() { Width = "40vw", Height = "30vh" });
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        CultureInfo cultureInfo = Thread.CurrentThread.CurrentCulture;
+        if (cultureInfo.IetfLanguageTag == "ar-OM")
+        {
+            isArabic = true;
+        }
+        else
+        {
+            isArabic = false;
+        }
+        user = UserService.User;
+        var result = await Leave.GetAll(isArabic);
+        if (result.Success)
+        {
+            leaveType = result.Data;
+        }
+        else
+        {
+
+        }
+        var response = await Leave.LeaveHistory(isArabic);
+        if (response.Success)
+        {
+            history = response.Data;
+        }
+        else
+        {
+
+        }
+        var response1 = await Leave.GetStatusDetail(Id, isArabic);
+        if (response1.Success)
+        {
+            status = response1.Data;
+        }
+        else
+        {
+
+        }
+        StateHasChanged();
+
+    }
+
+    private bool isDialogVisible = false;
+    private string selectedLeaveType;
+    private string selectedApproversStatus;
+
+    private void ShowDialog(string leaveType, string approversStatus)
+    {
+        selectedLeaveType = leaveType;
+        selectedApproversStatus = approversStatus;
+        isDialogVisible = true;
+    }
+
+    private void OnDialogVisibilityChanged(bool isVisible)
+    {
+        isDialogVisible = isVisible;
+    }
+
+    private void Cancel()
+    {
+        leaveRequest = new LeaveRequestViewModel();
+        modalDocumentname.FileName = "";
+        showSubstitute = false;
+    }
+
+    private async Task GetFromDate()
+    {
+        if (leaveRequest.From > leaveRequest.To)
+        {
+            leaveRequest.To = null;
+            leaveRequest.NumberOfdays = 0;
+        }
+        else if (leaveRequest.To != null)
+        {
+            GetTotalDays();
+        }
+    }
+
+    void DateRender(DateRenderEventArgs args)
+    {
+        args.Disabled = args.Disabled || args.Date.DayOfWeek == DayOfWeek.Friday || args.Date.DayOfWeek == DayOfWeek.Saturday;
+    }
+
+    private async Task GetTotalDays()
+    {
+        leaveRequest.NumberOfdays = (int)leaveRequest.To?.Subtract(leaveRequest.From.Value).TotalDays + 1;
+        if (leaveRequest.NumberOfdays > 5)
+        {
+            showSubstitute = true;
+        }
+        else
+        {
+            showSubstitute = false;
+            leaveRequest.SubstituteId = null;
+        }
+        StateHasChanged();
+    }
+
+    private async Task Submit(LeaveRequestViewModel model)
+    {
+        if (isSubmitting)
+        {
+            return;
+        }
+
+        isSubmitting = true;
+
+        var hasBalance = await LeaveBalanceService.GetLeaveBalanceByEmpId(user.EmployeeId);
+        if (hasBalance.Success)
+        {
+            if (hasBalance.Data.Balance >= model.NumberOfdays)
+            {
+                model.ApproverId = user.ApproverId;
+                model.EmployeeId = user.EmployeeId;
+                model.Approvers = user.LeaveApprover;
+
+                var result = await Leave.LeaveRequest(model, isArabic);
+
+                if (result.Successful)
+                {
+                    NotificationService.Notify(new NotificationMessage
+                        {
+                            Severity = NotificationSeverity.Success,
+                            Summary = "Success",
+                            Detail = "Request Sent.",
+                            Duration = 9000,
+                            Style = "custom-toast"
+                        });
+
+                    var response = await Leave.LeaveHistory(isArabic);
+                    if (response.Success)
+                    {
+                        history = response.Data;
+                        StateHasChanged();
+                    }
+
+                    Cancel();
+                }
+
+            }
+            else
+            {
+                NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Warning,
+                        Summary = "Insufficient Balance",
+                        Detail = "You do not have enough leave balance for this request.",
+                        Duration = 4000
+                    });
+            }
+        }
+
+
+        isSubmitting = false;
+        StateHasChanged();
+    }
+
+
+}
+
+

@@ -1,0 +1,35 @@
+﻿@using Data.Models.Leave
+@using System.Globalization
+@using SmedaInternalMobile.Components.Localization
+<RadzenDataGrid AllowFiltering="true" PagerHorizontalAlign="@HorizontalAlign.Center" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterPopupRenderMode="PopupRenderMode.OnDemand" AllowPaging="true" PageSize="5" AllowSorting="true"
+                Data="@Status" TItem="StatusViewModal">
+    <Columns>
+      
+        <RadzenDataGridColumn TItem="StatusViewModal" Property="Role" Filterable="false" Sortable="false" Title=@Localization.Role />
+        <RadzenDataGridColumn TItem="StatusViewModal" Property="Status" Filterable="false" Sortable="false" Title="@Localization.Status">
+            <Template Context="model">
+                @model.Status
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="StatusViewModal" Property="Reason" Filterable="false" Sortable="false" Title=@Localization.Reason Width="100px" />
+
+    </Columns>
+</RadzenDataGrid>
+
+@code{
+    [Parameter]
+    public List<StatusViewModal> Status { get; set; }
+    public bool isArabic;
+     protected override async Task OnInitializedAsync()
+    {
+        CultureInfo cultureInfo = Thread.CurrentThread.CurrentCulture;
+        if (cultureInfo.IetfLanguageTag == "ar-OM")
+        {
+            isArabic = true;
+        }
+        else
+        {
+            isArabic = false;
+        }
+    }
+}

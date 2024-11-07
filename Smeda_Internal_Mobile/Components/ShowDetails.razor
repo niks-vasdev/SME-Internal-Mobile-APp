@@ -1,0 +1,62 @@
+﻿
+@code {
+    [Parameter]
+    public bool IsVisible { get; set; }
+
+    [Parameter]
+    public string LeaveType { get; set; }
+
+    [Parameter]
+    public string ApproversStatus { get; set; }
+
+    [Parameter]
+    public string Role { get; set; }
+
+    [Parameter]
+    public string Reason { get; set; }
+
+
+
+    [Parameter]
+    public EventCallback<bool> IsVisibleChanged { get; set; }
+
+    public void Show() => IsVisible = true;
+    public void Hide() => IsVisible = false;
+
+    private void CloseDialog()
+    {
+        IsVisible = false;
+        IsVisibleChanged.InvokeAsync(IsVisible);
+    }
+}
+
+@if (IsVisible)
+{
+   @*  <div class="dialog-content">
+        <div class="modal-header">
+            <h5 class="modal-title">
+                <i class="material-icons" style="font-size: 20px; margin-right: 8px; vertical-align: middle;">assignment</i>
+                Approvers Actions
+            </h5>
+            <button type="button" class="close" @onclick="Hide" aria-label="Close">
+                <i class="material-icons">close</i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p>
+                <i class="material-icons" style="font-size: 16px; margin-right: 5px; vertical-align: middle;">event</i>
+                <strong>Leave:</strong> @LeaveType
+            </p>
+            <p>
+                <i class="material-icons" style="font-size: 16px; margin-right: 5px; vertical-align: middle;">check_circle</i>
+                <strong>Approver's Status:</strong> @ApproversStatus
+            </p>
+        </div>
+
+    </div>
+
+    <div class="modal-backdrop" @onclick="Hide"></div> *@
+
+}
+
+

@@ -1,0 +1,141 @@
+﻿@page "/vehiclerequest"
+@using Data.Models.Car
+@using SmedaInternalMobile.HttpHelperService.Car
+@using SmedaInternalMobile.HttpHelperService.DropDown
+@using SmedaInternalMobile.HttpHelperService.User
+@using SmedaInternalMobile.Components.Localization
+@inject UserService UserService
+@inject IVehicleRequest VechicleRequests
+@inject NavigationManager Navigation
+@inject DialogService DialogService
+@inject DropDownData DropDownData
+<style>
+    #vehicleDiv {
+    background-color: white !important;
+}
+
+</style>
+<PageTitle>@Localization.VehicleManagement</PageTitle>
+<div class="container-fluid mt-4" id="vehicleDiv">
+
+    <RadzenFieldset Text="@Localization.VehicleManagement" class="mt-3">
+        <RadzenTemplateForm Data="@request" Submit="@((VehicleRequestViewModel args) => { Submit(args); })">
+            <div class="row">
+
+                <div class="col-md-3">
+                    <RadzenLabel Text="@Localization.FromDate" class="mb-1" /> 
+                    <RadzenDatePicker AllowInput="false" Change="OnChangeFromDate" DateFormat="d" TValue="DateTime"
+                                      class="w-100" @bind-Value=@request.From Name="FromDate" />
+                    <RadzenRequiredValidator style="display: block;" Component="FromDate" Text="@Localization.Required" />
+                </div>
+
+                <!-- To Date -->
+                <div class="col-md-3">
+                    <RadzenLabel Text="@Localization.ToDate" class="mb-1" /> 
+                    <RadzenDatePicker AllowInput="false" Min="@request.From" DateFormat="d" TValue="DateTime"
+                                      class="w-100" @bind-Value=@request.To Name="ToDate" />
+                    <RadzenRequiredValidator style="display: block;" Component="ToDate" Text="@Localization.Required" />
+                </div>
+
+                <!-- Type Of Request -->
+                <div class="col-md-3">
+                    <RadzenLabel Text="@Localization.RequestType" class="mb-1" />
+                    <RadzenDropDown @bind-Value="request.TypeOfRequestId" Placeholder="@Localization.RequestType"
+                                    class="w-100"
+                                    Data="@(typeofrequest.Select(c => new { Id = c.Id, Name = isArabic ? c.ArabicName : c.Name }).Distinct().AsQueryable())"
+                                    TextProperty="Name" ValueProperty="Id" Name="TypeOfRequest" />
+                    <RadzenRequiredValidator style="display: block;" Component="TypeOfRequest" Text="@Localization.Required" />
+                </div>
+
+                <!-- Reason -->
+                <div class="col-md-3">
+                    <RadzenLabel Text="@Localization.Reason" class="mb-1" /> 
+                    <RadzenTextArea Placeholder="@Localization.Reason" class="w-100" @bind-Value="request.Reason" Name="Reason" />
+                    <RadzenRequiredValidator style="display: block;" Component="Reason" Text="@Localization.Required" />
+                </div>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-md-12 d-flex align-items-end justify-content-center mt-4">
+                    <RadzenButton ButtonType="ButtonType.Submit" Icon="add" Style="background-color:#003366;" Text="@Localization.Submit" />
+                    &nbsp;
+                    &nbsp;
+                    &nbsp;
+                    <RadzenButton ButtonStyle="ButtonStyle.Light" Icon="cancel" Click="@(() => Cancel())" class="ml-2" Text="@Localization.Cancellation" />
+                </div>
+            </div>
+        </RadzenTemplateForm>
+    </RadzenFieldset>
+
+    <RadzenFieldset class="mt-4" Text="@Localization.VehicleManagement">
+        @foreach (var model in vehicleRequest)
+        {
+            <RadzenCard Class="custom-card" Style="margin-bottom: 15px;">
+                <div class="card-header custom-card-header">
+                    <h4><i class="material-icons header-icon">directions_car</i>@Localization.VehicleManagement</h4>
+                </div>
+                <div class="card-body custom-card-body">
+                    <div class="row align-items-center mb-2">
+                        <div class="col-auto">
+                            <i class="material-icons body-icon">account_circle</i>
+                        </div>
+                        <div class="col">
+                            <strong>@Localization.Name:</strong> @model.EmployeeName
+                        </div>
+                    </div>
+
+                    <div class="row align-items-center mb-2">
+                        <div class="col-auto">
+                            <i class="material-icons body-icon">phone</i>
+                        </div>
+                        <div class="col">
+                            <strong>@Localization.Contact:</strong> @model.PhoneNo
+                        </div>
+                    </div>
+                    <div class="row align-items-center mb-2">
+                        <div class="col-auto">
+                            <i class="material-icons body-icon">event_note</i>
+                        </div>
+                        <div class="col">
+                            <strong>@Localization.Reason:</strong> @model.Reason
+                        </div>
+                    </div>
+
+                    <div class="row align-items-center mb-2">
+                        <div class="col-auto">
+                            <i class="material-icons body-icon">date_range</i>
+                        </div>
+                        <div class="col">
+                            <strong>@Localization.From:</strong> @model.From.ToString("dd/MM/yyyy")
+                        </div>
+                    </div>
+
+                    <div class="row align-items-center mb-2">
+                        <div class="col-auto">
+                            <i class="material-icons body-icon">date_range</i>
+                        </div>
+                        <div class="col">
+                            <strong>@Localization.To:</strong> @model.To.ToString("dd/MM/yyyy")
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between align-items-center p-1" style="padding: 0.25rem; border-top: none;">
+                    <div class="d-flex align-items-center">
+                        <i class="material-icons body-icon">schedule</i>
+                            <strong class="ml-2">@Localization.Status:</strong>
+                        <span class="ml-1">@model.ApproverStatus</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <RadzenButton ButtonStyle="ButtonStyle.Secondary"
+                                      Variant="Variant.Flat"
+                                      Shade="Shade.Lighter"
+                                      Icon="info"
+                                      class="m-1"
+                                      Click="@(() => GetActionDetail(model.Id.Value))" />
+                    </div>
+                </div>
+            </RadzenCard>
+        }
+    </RadzenFieldset>
+
+</div>

@@ -1,0 +1,45 @@
+﻿@page "/language"
+@using System.Globalization
+@using SmedaInternalMobile.Components.Localization
+
+@inject NavigationManager NavigationManager
+
+<div class="language-switcher" style="display: flex; align-items: center;">
+    <button @onclick="SwitchLanguage" style="background-color: #00416d; color: white; border: none; padding: 8px; cursor: pointer; display: flex; align-items: center;">
+        <img src="@(selectedCulture.Name == "en-US" ? "images/oman_flag.png" : "images/us_flag.png")"
+             alt="Language Flag"
+             style="width: 30px; height: 20px; border-radius: 5px; margin-right: 8px;" />
+        <span style="font-weight: bold;">@(selectedCulture.Name == "en-US" ? "عربي" : "English")</span>
+    </button>
+</div>
+
+@code {
+    private CultureInfo selectedCulture { get; set; }
+
+    protected override void OnInitialized()
+    {
+        var cultureName = Preferences.Get("Culture", "en-US");
+        selectedCulture = new CultureInfo(cultureName);
+    }
+
+    private void SwitchLanguage()
+    {
+        if (selectedCulture.Name == "en-US")
+        {
+            SetCulture("ar-OM");
+        }
+        else
+        {
+            SetCulture("en-US");
+        }
+    }
+
+    private void SetCulture(string culture)
+    {
+        selectedCulture = new CultureInfo(culture);
+        CultureInfo.DefaultThreadCurrentCulture = selectedCulture;
+        CultureInfo.DefaultThreadCurrentUICulture = selectedCulture;
+        Preferences.Set("Culture", selectedCulture.Name);
+        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+    }
+}

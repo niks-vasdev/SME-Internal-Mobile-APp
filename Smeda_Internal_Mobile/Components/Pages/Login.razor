@@ -1,0 +1,129 @@
+﻿@page "/login"
+@using SmedaInternalMobile.Components.Localization
+
+
+
+<style>
+    .input-border input {
+        padding-left: 45px;
+        padding-right: 15px;
+        border: 2px solid white;
+        box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.45);
+        border-radius: 20px;
+        width: 300px;
+        text-align: @(isArabic ? "right" : "left");
+    }
+
+    .username-field input:focus {
+        border-color: red;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.25);
+    }
+
+    .navbar {
+        background-color: #00416d;
+        padding: 10px 20px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        direction: @(isArabic ? "rtl" : "ltr"); /* Set direction based on language */
+    }
+
+    .navbar .nav-link {
+        color: white; 
+        margin-left: 20px;
+        text-decoration: none;
+    }
+
+    .navbar .nav-link:hover {
+        color: white;
+        text-decoration: underline;
+    }
+
+    .languageDiv {
+        margin-left: 20px;
+    }
+
+    .grid-container {
+        position: relative;
+        top: -10px;
+        direction: @(isArabic ? "rtl" : "ltr"); 
+    }
+
+    .header-container {
+        background-color: #00416d;
+        height: 350px;
+        border-bottom-right-radius: 80px;
+        border-bottom-left-radius: 80px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    .header-label {
+        margin-top: auto;
+        margin-bottom: 15px;
+    }
+
+    .login-button {
+        margin-top: 20px;
+        background-color: #00416d;
+        padding: 10px;
+        border-radius: 15px;
+        width: 300px;
+        color: white;
+        direction: @(isArabic ? "rtl" : "ltr"); 
+    }
+</style>
+
+<div class="navbar">
+    <NavLink href="/forgot-password" class="nav-link">@Localization.ForgotPassword</NavLink>
+    <div class="languageDiv">
+        <SmedaInternalMobile.Components.Pages.Multilingual />
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="header-container">
+        <div class="logo-container" style="margin-top: 50px">
+            <img src=".\first.png" alt="SME Logo" style="filter: brightness(0) invert(1);" />
+        </div>
+        <div class="header-label">
+            <label class="header-text fs-2 fw-bold" style="color: white;">@Localization.Login</label>
+        </div>
+    </div>
+
+    <div class="d-flex flex-column justify-content-center align-items-center">
+        <div class="username-field" style="margin-top: 50px">
+            <div class="input-border d-flex">
+                <i class="fa fa-user"></i>
+                <input type="text" @bind="loginModel.UserName" placeholder=@Localization.UserName style="padding-top: 8px; padding-bottom: 8px" />
+            </div>
+        </div>
+
+        <div class="username-field" style="margin-top: 20px">
+            <div class="input-border">
+                <i class="fa fa-key"></i>
+                <input type="password" @bind="loginModel.Password" placeholder=@Localization.Password style="padding-top: 8px; padding-bottom: 8px" />
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <div style="color: red; margin-top: 10px">@ErrorMessage</div>
+        }
+
+        @if (IsBusy)
+        {
+            <div style="margin-top: 10px">
+                <LoadingComponents/>
+            </div>
+        }
+        else
+        {
+            <button @onclick="LoginBtn" class="fw-bold login-button">
+                @Localization.Login
+            </button>
+        }
+    </div>
+</div>

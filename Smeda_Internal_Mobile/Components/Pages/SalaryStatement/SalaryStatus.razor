@@ -1,0 +1,25 @@
+﻿@using Data.Models.Leave
+@using SmedaInternalMobile.HttpHelperService.Leave
+@using SmedaInternalMobile.HttpHelperService.User
+@using SmedaInternalMobile.Components.Localization
+@inject UserService UserService
+@inject ILeave Leave
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+
+<RadzenDataGrid AllowColumnResize="true" AllowFiltering="true" PagerHorizontalAlign="@HorizontalAlign.Center" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                FilterPopupRenderMode="PopupRenderMode.OnDemand" AllowPaging="false" PageSize="5" AllowSorting="false"
+                Data="@Status" TItem="StatusViewModal"
+                Style="max-width: auto%; overflow-x: auto; height: auto; white-space: nowrap;">
+    <Columns>
+
+        <RadzenDataGridColumn TItem="StatusViewModal" Property="Role" Filterable="false" Sortable="false" Title=@Localization.Role />
+        <RadzenDataGridColumn TItem="StatusViewModal" Property="Status" Filterable="false" Sortable="false" Title=@Localization.Status>
+            <Template Context="model">
+                @model.Status
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="StatusViewModal" Property="Reason" Filterable="false" Sortable="false" Title=@Localization.Reason Width="auto" />
+
+    </Columns>
+</RadzenDataGrid>

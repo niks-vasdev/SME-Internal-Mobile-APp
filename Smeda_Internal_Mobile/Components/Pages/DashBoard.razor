@@ -1,0 +1,144 @@
+﻿@page "/dashBoard"
+@using SmedaInternalMobile.Components.CustomComponents
+@using SmedaInternalMobile.HttpHelperService.Employee
+@using SmedaInternalMobile.HttpHelperService.Leave
+@using SmedaInternalMobile.Components.Localization
+@inject ILeave Leave
+@inject IEmployeeService EmployeeService
+@using Radzen
+@using Radzen.Blazor
+<style>
+    .dashboard-container {
+        margin-top: 0;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .welcome-section {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+        .welcome-section img {
+            width: 120px;
+            margin-bottom: 15px;
+        }
+
+        .welcome-section h1 {
+            color: #00416d;
+            font-weight: 700;
+            font-size: 28px;
+        }
+
+        .welcome-section p {
+            color: #666;
+            font-size: 16px;
+        }
+
+    .rz-card {
+        border-radius: 8px;
+        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .rz-text-overline {
+        color: #888;
+        font-weight: bold;
+    }
+
+    .rz-text-body {
+        font-size: 36px;
+        color: #00416d;
+    }
+
+    .dashboard-section .RadzenCard {
+        border-radius: 12px;
+        background-color: #fff;
+        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin: 20px;
+        transition: transform 0.2s ease-in-out;
+    }
+
+        .dashboard-section .RadzenCard:hover {
+            transform: translateY(-5px);
+        }
+
+    .icon-style {
+        font-size: 45px;
+        color: #4169E1;
+    }
+
+</style>
+@if (Is_busy)
+{
+@*     <LoadingComponents />
+ *@}
+else
+{
+    <div class="dashboard-container">
+        <div class="welcome-section">
+            <img src=".\first.png" alt="SME Logo" />
+            <h1>@Localization.WelcomeSME</h1>
+            <p>@Localization.Dashboard</p>
+        </div>
+
+        <RadzenStack Orientation="Orientation.Vertical" Gap="1rem">
+            <div class="dashboard-section">
+                <RadzenCard Variant="Variant.Filled" Class="rz-mx-auto rz-card">
+                    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" Gap="1rem" Class="rz-p-4">
+                        <RadzenStack Gap="0">
+                            <RadzenText TextStyle="TextStyle.Overline" Class="rz-text-overline">@Localization.TOTAL_EMPLOYEES</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body1" Class="rz-text-body">
+                                <b>@(profile?.Count ?? 0)</b>
+                            </RadzenText>
+                        </RadzenStack>
+                        <RadzenText TextStyle="TextStyle.Body1">
+                            <i class="fa fa-users icon-style"></i>
+                        </RadzenText>
+                    </RadzenStack>
+                </RadzenCard>
+            </div>
+
+            <!-- HR Role Section -->
+            @if (selectedEmployee != null)
+
+            {
+                <div class="dashboard-section">
+                    <RadzenCard Variant="Variant.Filled" Class="rz-mx-auto rz-card">
+                        <RadzenStack Orientation="Orientation.Vertical" Gap="1rem" Class="rz-p-4">
+                            <RadzenText TextStyle="TextStyle.Body1" Style="font-size:20px;color:#4169E1;">
+                                <b>@selectedEmployee.Name</b>
+                            </RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body2">
+                                <strong>@Localization.Designation:</strong> @selectedEmployee.Designation
+                            </RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body2">
+                                <strong>@Localization.Department:</strong> @selectedEmployee.Department
+                            </RadzenText>
+                        </RadzenStack>
+                    </RadzenCard>
+                </div>
+            }
+
+            <!-- Additional Cards -->
+            <div class="dashboard-section">
+                <RadzenCard Variant="Variant.Filled" Class="rz-mx-auto rz-card">
+                    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" Gap="1rem" Class="rz-p-4">
+                        <RadzenStack Gap="0">
+                            <RadzenText TextStyle="TextStyle.Overline" Class="rz-text-overline">@Localization.ServiceRequests</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body1" Class="rz-text-body" Style="color:#478778;">
+                                <b>@NoOfServiceRequests</b>
+                            </RadzenText>
+                        </RadzenStack>
+                        <RadzenText TextStyle="TextStyle.Body1">
+                            <i class="fa fa-cogs icon-style"></i>
+                        </RadzenText>
+                    </RadzenStack>
+                </RadzenCard>
+            </div>
+        </RadzenStack>
+    </div>
+
+}

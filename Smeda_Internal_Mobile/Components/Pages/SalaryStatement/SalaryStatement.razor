@@ -1,0 +1,117 @@
+﻿@page "/SalaryStatement"
+@using Data.Models.SalaryStatementService
+@using SmedaInternalMobile.HttpHelperService.Leave
+@using SmedaInternalMobile.HttpHelperService.SalaryStatementService
+@using SmedaInternalMobile.HttpHelperService.User
+@using SmedaInternalMobile.Components.Localization
+@inject UserService UserService
+@inject NavigationManager NavigationManager
+@inject NotificationService NotificationService
+@inject ISalaryStatementService SalaryStatementService
+@inject DialogService DialogService
+@inject ILeave Leave
+<style>
+    .row > .col-md-2, .row > .col-md-4 {
+        padding: 5px;
+    }
+
+    .validator {
+        color: red;
+        margin-left: 4px;
+    }
+</style>
+
+<PageTitle>SalaryStatement</PageTitle>
+
+<div class="container-fluid mt-4">
+
+	<RadzenCard>
+
+        <RadzenFieldset Text=@Localization.SalaryStatementRequest>
+
+				<RadzenTemplateForm Data="@salaryStatementViewModel" Submit="@((SalaryStatementViewModel args) => { Submit(args); })">
+					<div class="container-fluid">
+						<div class="row">
+							<div class="align-items-center d-flex col-md-2 pb-5">
+                            <RadzenLabel Text=@Localization.StatementType />
+							</div>
+							<div class="col-md-4">
+								@if (SalaryStatementType == null)
+								{
+                                <p><em>@Localization.Loading___</em></p>
+								}
+								else
+								{
+                                <RadzenDropDown @bind-Value="salaryStatementViewModel.SalaryStatementTypeId" AllowClear="true" Placeholder=@Localization.RequestType style="width: 100%;"
+													Data="@(SalaryStatementType.Select(c => new {Id = c.Id , Name = arabic?c.TitleAr:c.TitleEn}).Distinct().AsQueryable())"
+													TextProperty="Name" ValueProperty="Id" Name="RequestType">
+									</RadzenDropDown>
+
+
+                                <RadzenRequiredValidator style="display: block;" Component="RequestType" Text="@Localization.Required" Popup="@popup" />
+                            }
+							</div>
+						</div>
+					</div>
+					<div class="row justify-content-center">
+						<div class="col-md-12 d-flex align-items-end justify-content-center" style="margin-top: 16px;">
+                        <RadzenButton ButtonType="ButtonType.Submit" Icon="add" Style=" background-color:#003366;" Text=@Localization.Submit />
+                        &nbsp;
+                        &nbsp;
+                        &nbsp;
+                        <RadzenButton ButtonStyle="ButtonStyle.Light" Icon="cancel" Click="@(() => Cancel())" Style="display: inline-block; margin-left: 10px;" Text=@Localization.Cancellation />
+						</div>
+					</div>
+				</RadzenTemplateForm>
+			</RadzenFieldset>
+
+        <RadzenFieldset class="mt-4" Text="@Localization.SalaryStatement">
+            @foreach (var model in history)
+            {
+                <RadzenCard Class="custom-card" Style="margin-bottom: 15px;">
+                    <div class="card-header custom-card-header">
+                        <h4><i class="material-icons header-icon">description</i> @Localization.SalaryStatement</h4>
+                    </div>
+                    <div class="card-body custom-card-body">
+                        <div class="row align-items-center mb-2">
+                            <div class="col-auto">
+                                <i class="material-icons body-icon">description</i>
+                            </div>
+                            <div class="col">
+                                <strong>@Localization.StatementType:</strong> @model.SalaryStatementType
+                            </div>
+                        </div>
+
+                        <div class="row align-items-center mb-2">
+                            <div class="col-auto">
+                                <i class="material-icons body-icon">assignment</i>
+                            </div>
+                            <div class="col">
+                                <strong>@Localization.Status:</strong> @model.ApproversStatus
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between align-items-center p-1" style="padding: 0.25rem; border-top: none;">
+                        <div class="d-flex align-items-center">
+                            <i class="material-icons body-icon">schedule</i>
+                            <strong class="ml-2">@Localization.Action:</strong>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <RadzenButton ButtonStyle="ButtonStyle.Secondary"
+                                          Variant="Variant.Flat"
+                                          Shade="Shade.Lighter"
+                                          Icon="info"
+                                          class="m-1"
+                                          Click="@(() => GetActionDetail(model.Id))" />
+                        </div>
+                    </div>
+
+                </RadzenCard>
+            }
+        </RadzenFieldset>
+
+
+
+		@* } *@
+	</RadzenCard>
+</div>

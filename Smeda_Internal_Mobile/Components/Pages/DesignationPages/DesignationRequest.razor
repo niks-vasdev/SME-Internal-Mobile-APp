@@ -1,0 +1,128 @@
+﻿@using Data.Models.Designation
+@using Radzen
+@using SmedaInternalMobile.Authentication
+@using SmedaInternalMobile.HttpHelperService.Designation
+@using SmedaInternalMobile.HttpHelperService.Employee
+@using SmedaInternalMobile.HttpHelperService.Leave
+@using SmedaInternalMobile.HttpHelperService.User
+@page "/designationRequest"
+@inject NotificationService NotificationService
+@inject UserService UserServices
+@inject IEmployeeService EmployeeService
+@inject NavigationManager Navigation
+@inject NotificationService NotificationServices
+@inject IChangeDesignations ChangeDesignations
+@inject IAuthService AuthService
+@inject DialogService DialogService
+@inject IJSRuntime JSRuntime
+@inject ILeave Leave
+
+
+<PageTitle>ChangeDesignation</PageTitle>
+
+<div class="container-fluid mt-4">
+
+    <RadzenCard Text="ChangeDesignationService">
+        
+            <RadzenFieldset Text="Change Designation">
+                <RadzenTemplateForm Data="@changeDesignations" Submit="@((ChangeDesignationViewModel args) => { Submit(args); })">
+                    <div class="container-fluid">
+                        <div class="row align-items-center">
+                            <div class="align-items-center d-flex col-md-2">
+                                <RadzenLabel Text="CurrentPosition" />
+                            </div>
+                            <div class="col-md-4">
+                                <RadzenTextBox @bind-Value="changeDesignations.CurrentDesignation" Placeholder="Current Position" style="width:100%" Name="Current Position" Disabled />
+                                <RadzenRequiredValidator style="display: block;" Component="Current Position" Text="Current Position is required" Popup=@popup />
+                            </div>
+                        </div>
+                        <br />
+                        <div class="row align-items-center mb-4">
+                            <div class="align-items-center d-flex col-md-2">
+                                <RadzenLabel Text="NewPosition" />
+                            </div>
+                            <div class="col-md-4">
+                                <RadzenTextBox @bind-Value="@changeDesignations.NewDesignation" Placeholder="NewPosition" style="width:100%" Name="NewDesignation" />
+                                <RadzenRequiredValidator style="display: block;" Component="NewDesignation" Text="New Designation is required" Popup=@popup />
+                            </div>
+                            <div class="align-items-center justify-content-center d-flex col-md-2">
+                                <RadzenLabel Text="Reason" />
+                            </div>
+                            <div class="col-md-4">
+                                <RadzenTextArea @bind-Value="@changeDesignations.Reason" Placeholder="Reason" style="width:100%" Name="Reason" />
+                                <RadzenRequiredValidator style="display: block;" Component="Reason" Text="Reason is required" Popup=@popup />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row justify-content-center mb-3">
+                        <div class="col-md-12 d-flex align-items-end justify-content-center" style="margin-top: 16px;">
+                        <RadzenButton ButtonType="ButtonType.Submit" Icon="add" Style=" background-color:#003366;" Text="Submit" Disabled="@isSubmitting" />
+                            <RadzenButton ButtonStyle="ButtonStyle.Light" Icon="cancel" Click="@(() => Cancel())" Style="display: inline-block; margin-left: 10px;" Text="Cancellation" />
+                        </div>
+                    </div>
+                </RadzenTemplateForm>
+            </RadzenFieldset>
+        
+
+        <RadzenFieldset class="mt-4" Text="ListofRequests">
+      
+                <div class="row mt-5">
+                    @foreach (var item in history)
+
+                    {
+                        <div class="col-md-4 mb-4">
+                            <RadzenCard Class="custom-card">
+                                <div class="card-header custom-card-header">
+                                    <h4><i class="material-icons header-icon">assignment</i> Change Designation Request @((history.IndexOf(item) + 1))</h4>
+                                </div>
+                                <div class="card-body custom-card-body">
+                                    <div class="row align-items-center mb-2">
+                                        <div class="col-auto">
+                                            <i class="material-icons body-icon">work</i>
+                                        </div>
+                                        <div class="col">
+                                            <strong>Current Designation:</strong> @item.CurrentDesignation
+                                        </div>
+                                    </div>
+
+                                    <div class="row align-items-center mb-2">
+                                        <div class="col-auto">
+                                            <i class="material-icons body-icon">work_outline</i>
+                                        </div>
+                                        <div class="col">
+                                            <strong>New Designation:</strong> @item.NewDesignation
+                                        </div>
+                                    </div>
+
+                                    <div class="row align-items-center mb-2">
+                                        <div class="col-auto">
+                                            <i class="material-icons body-icon">description</i>
+                                        </div>
+                                        <div class="col">
+                                            <strong>Reason:</strong> @item.Reason
+                                        </div>
+                                    </div>
+                             
+                                </div>
+                                <div class="card-footer d-flex align-items-center justify-content-between p-1" style="padding: 0.25rem; border-top: none;">
+                                    
+                                    <div class="d-flex align-items-center ml-2">
+                                      
+                                        <div class="col">
+                                            <strong>Status:</strong> @item.ApproversStatus
+                                        </div>
+                                        <RadzenButton ButtonStyle="ButtonStyle.Secondary" Variant="Variant.Flat" Shade="Shade.Lighter" Icon="info" class="m-1" Click=@(() =>GetActionDetail(item.Id)) />
+                                    </div>
+                                </div>
+                            </RadzenCard>
+                        </div>
+                    }
+                </div>
+            
+                  </RadzenFieldset>
+    </RadzenCard>
+
+</div>
+
+
+
